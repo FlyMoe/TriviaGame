@@ -286,6 +286,8 @@ function stop() {
 		resetGame();
 	});
 
+	// Hide number counter
+	$('#show-number').hide();
  }
 
  function resetGame () {

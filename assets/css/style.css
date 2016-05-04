@@ -11,6 +11,10 @@ head {
 section {
 	width: 100%;
 }
+li { 
+	cursor: pointer; 
+}
+
 #logo {
 	width: 400px;
 	display: block;
