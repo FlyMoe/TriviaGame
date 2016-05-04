@@ -30,6 +30,7 @@ var correctAnswers = 0;
 var incorrectAnswers = 0;
 var triviaOver = false;
 
+
 // Javascript function that wraps everything
 $(document).ready(function(){
 	var question, answer1;
@@ -50,6 +51,8 @@ $(document).ready(function(){
     $(".answerList").on("click", "li", function() {
 	   
 	    if ($(this).val() == questions[currentQuestion].correctAnswer) {
+	    	var audio = new Audio("assets/mp3/applause.mp3");
+	    	audio.play();
 	    	
 	    	// Increment the correctAnswers
             correctAnswers++;                
@@ -84,11 +87,11 @@ $(document).ready(function(){
 					gameOver();
 				}
 
-			}, 5000);
-
-			// highlightAnswer();
+			}, 7000);
 			
 	    } else {
+	    	var audio = new Audio("assets/mp3/buzzer.wav");
+	    	audio.play();
 	    	
 	    	// Increment the incorrectAnswers
             incorrectAnswers++;              
@@ -101,7 +104,6 @@ $(document).ready(function(){
 
 			// Remove the question
 			$(".question").remove();
-
 			
 			// Display that the answer was wrong
 			$(".result").show();
@@ -124,6 +126,7 @@ $(document).ready(function(){
 					// Display the next set of questions and answers
 					displayQA();
 				} else {
+					// Game is over!
 					gameOver();
 				}
 
@@ -137,10 +140,13 @@ $(document).ready(function(){
 });
 
 function highlightAnswer() {
+
+	// Add the class to highlight the answer
 	$(".answer").mouseover(function(){
 		$(this).addClass("highlight-yellow");
 	 });
 
+	// Remove the class so the answer isn't highlighted anymore
 	$(".answer").mouseout(function(){
 		$(this).removeClass("highlight-yellow");
 	 });
@@ -148,51 +154,39 @@ function highlightAnswer() {
 
 function displayQA() {
 
-   var question = questions[currentQuestion].question;
-   // var questionClass = $(document).find(".quizContainer > .question");
-   console.log("question: "+question);
-   console.log("currentQuestion: "+currentQuestion);
-   var questionClass = ".question";
-     // console.log("questionClass: "+questionClass);
+	var question = questions[currentQuestion].question;  
+	var questionClass = ".question";   
+	var answerList = ".answerList";
+    var numAnswers = questions[currentQuestion].answers.length;  
+    var theQuestion = $('<div>');
 
-   // var answerList = $(document).find(".quizContainer > .answerList");
-   var answerList = ".answerList";
-    var numAnswers = questions[currentQuestion].answers.length;
-
-    // Set the questionClass text to the current question
-    // $(questionClass).text(question);
-    // $('section').html($('<div>', {class: 'question'}));
-     //$(".question").html(question);
-     var theQuestion = $('<div>');
-		 theQuestion.addClass('question');
-		 theQuestion.text(question);
-		 $(".questionContainer").html(theQuestion);
-
-
-    // $("<div/>").addClass("question").text(question);
+    // Add the question
+	theQuestion.addClass('question');
+	theQuestion.text(question);
+	$(".questionContainer").html(theQuestion);
 
     // Remove all current <li> elements (if any)
     $(answerList).find("li").remove();
 
-
-    var choice;
+    // Loop the the answers and add them to the list
     for (i = 0; i < numAnswers; i++) {
         answer = questions[currentQuestion].answers[i];
-       // alert("Answer: "+answer);
         $('<li class="answer" value="'+i+'">' + answer + '</li>').appendTo(answerList);
     }
 
+    // Allow for highlighting of the answers.
     highlightAnswer();
 }
 
 function resetQA() {
     currentQuestion = 0;
     correctAnswers = 0;
+    incorrectAnswers = 0;
 }
 
 function timer() {
-	var number = 33;
-	var audio = new Audio("assets/mp3/Jeopardy-theme-song.mp3");
+	var number = 16;
+	
     // $('#stop').on('click', stop);
     // $('#resume').on('click', run);
     function run(){
@@ -201,11 +195,22 @@ function timer() {
     }
     function decrement(){
       number--;
-      // audio.play();
+      $('#show-number').show();
       $('#show-number').html("Time Remaining: "+number);
       if (number === 0){
         stop();
-        outOfTime();
+        console.log("questions.length: "+questions.length);
+         console.log("currentQuestion: "+currentQuestion);
+        if (questions.length !== currentQuestion){
+			outOfTime();
+		} else {
+			alert("Game over!");
+			var audio = new Audio("assets/mp3/buzzer.wav");
+	    	audio.play();
+			outOfTime();
+			gameOver();
+		}
+        
       }
     }
 
@@ -217,6 +222,10 @@ function stop() {
  }
 
  function outOfTime() {
+
+ 	// Increment the incorrectAnswers
+    incorrectAnswers++;
+
  	// Remove all current <li> elements
 	$(".answerList").find("li").remove();
 
@@ -235,12 +244,22 @@ function stop() {
 		// Hide the result
 		$(".result").hide();
 
-		//Start the timer
-		timer();
+		// If it's not the last question, create the next set of questions and answers.
+		// If it is the last questions, then the game is over.
+		if (questions.length !== currentQuestion){
 
-		//Show next question
-		displayQA();
+			//Start the timer
+			timer();
 
+			//Show next question
+			displayQA();
+
+		} else {
+
+			// Game over!!
+			gameOver();
+
+		}
 	}, 5000);
  }
 
@@ -260,4 +279,31 @@ function stop() {
 	$(".result").html("Game over! <br><br>");
 	$(".result").append("Correct Answers: "+correctAnswers+"<br><br>Incorrect Answers: "+incorrectAnswers);
 
+	// Add the Reset Game button
+	$(".nextButton").show();
+	$('.nextButton').html('<input class="myButton" type="button" value="Reset Game">');
+	$('.nextButton').click(function(){  
+		resetGame();
+	});
+
  }
+
+ function resetGame () {
+ 	currentQuestion = 0;
+    correctAnswers = 0;
+    incorrectAnswers = 0;
+
+    // Show start button
+    $(".container1").show();
+
+    // Hide the result
+	$(".result").hide();
+
+	// Hide the result
+	$(".nextButton").hide();
+
+	// Hide number counter
+	$('#show-number').hide();
+
+ }
+
